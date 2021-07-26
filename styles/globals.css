@@ -1,7 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Open+Sans:wght@300;400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-    @apply bg-gray-700 text-white
+    @apply bg-dark-gray;
+    @apply text-white;
 }
+
+h1 {
+    @apply text-lg lg:text-xl;
+    @apply font-semibold;
+    @apply mb-5;
+}
+
+h2 {
+    @apply text-base lg:text-lg;
+    @apply mb-10;
+}
+
+/*p {
+    @apply mb-5;
+}*/
