@@ -9,7 +9,7 @@ function SmallContainer({children, hasBoarder}: PropsWithChildren<SmallContainer
   return (
     <div className="flex items-center min-h-screen">
       <main
-        className={`w-10/12 sm:w-8/12 lg:w-6/12 xl:w-4/12 mx-auto p-5 ${hasBoarder && "border border-westar rounded"}`}
+        className={`w-10/12 sm:w-8/12 lg:w-6/12 xl:w-4/12 2xl:w-3/12 mx-auto p-5 ${hasBoarder && "border border-westar rounded"}`}
       >
         {children}
       </main>
