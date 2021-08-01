@@ -20,6 +20,7 @@
       "@/layouts/*": ["layouts/*"],
       "@/assets/*": ["public/*"],
       "@/typings/*":  ["typings/*"],
+      "@/utils/*": ["utils/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

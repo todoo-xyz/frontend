@@ -1,58 +1,38 @@
-import type {NextApiRequest, NextApiResponse} from 'next'
+import { supabase } from "@/utils/supabaseClient";
+import { NextApiRequest, NextApiResponse } from "next";
 import Validator from "validatorjs";
-import type {ApiLoginResponse} from "@/typings/ApiLoginResponse";
-import {supabase} from "../../utils/supabaseClient";
 
-type RequestBody = {
-  email: string,
-  password: string,
-}
-
-const validationRuleLogin = {
+const validationRules = {
   email: 'required|email',
-  password: 'required|min:6'
+  password: 'required|min:8'
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiLoginResponse>) {
-  if (req.method === 'POST') {
-    const reqData: RequestBody = JSON.parse(req.body)
+export default async function registerUser(req: NextApiRequest, res: NextApiResponse) {
+  const { email, password } = req.body
 
-    const validation = new Validator(
-      {
-        email: reqData.email,
-        password: reqData.password,
-      },
-      validationRuleLogin)
+  const validation = new Validator({email, password}, validationRules)
 
-    if (validation.fails()) {
-      const validatorErrors = validation.errors.all()
-      const errors: Array<string> = []
+  if (validation.fails()) {
+    const errorArray: Array<string> = Array()
+    const errors = validation.errors.all()
 
-      if (validatorErrors.email) {
-        validatorErrors.email.forEach(item => errors.push(item))
-      }
-      if (validatorErrors.password) {
-        validatorErrors.password.forEach(item => errors.push(item))
-      }
-      return res.status(422).json({
-        errors
-      })
+    if (errors.email) {
+      errorArray.push(...errors.email)
     }
 
-    const {error} = await supabase.auth.signIn({
-      email: reqData.email,
-      password: reqData.password
-    })
-
-    if (error) {
-      return res.status(400).json({
-        error
-      })
+    if (errors.password) {
+      errorArray.push(...errors.password)
     }
 
-
-
+    return res.status(422).json({errors: errorArray})
   }
 
-  return res.status(404)
+
+  const { user, error } = await supabase.auth.signIn({
+    email: email,
+    password: password,
+  })
+
+  if (error) return res.status(400).json({ error: error.message })
+  return res.status(200).json({ user: user })
 }

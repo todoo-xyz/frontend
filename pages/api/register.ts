@@ -1,62 +1,41 @@
-import type {NextApiRequest, NextApiResponse} from 'next'
+import { supabase } from "@/utils/supabaseClient";
+import { NextApiRequest, NextApiResponse } from "next";
 import Validator from "validatorjs";
-import {supabase} from "../../utils/supabaseClient";
 
-type RequestBody = {
-  email: string,
-  email_confirmation: string
-  password: string,
-  password_confirmation: string,
-}
-
-const validationRuleRegister = {
+const validationRules = {
   email: 'required|email|confirmed',
-  password: 'required|min:6|confirmed'
+  password: 'required|min:8|confirmed'
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const reqData: RequestBody = JSON.parse(req.body)
+export default async function registerUser(req: NextApiRequest, res: NextApiResponse) {
+    const { email, email_confirmation, password, password_confirmation } = JSON.parse(req.body)
 
-    const validation = new Validator(
-      {
-        email: reqData.email,
-        email_confirmation: reqData.email_confirmation,
-        password: reqData.password,
-        password_confirmation: reqData.password_confirmation
-      },
-      validationRuleRegister)
+    const validation = new Validator({
+      email,
+      email_confirmation,
+      password,
+      password_confirmation,
+    }, validationRules)
 
-    if (validation.fails()) {
-      const validatorErrors = validation.errors.all()
-      const errors: Array<string> = []
+  if (validation.fails()) {
+    const errorArray: Array<string> = Array()
+    const errors = validation.errors.all()
 
-      if (validatorErrors.email) {
-        validatorErrors.email.forEach(item => errors.push(item))
-      }
-      if (validatorErrors.password) {
-        validatorErrors.password.forEach(item => errors.push(item))
-      }
-
-      return res.status(422).json({
-        errors
-      })
+    if (errors.email) {
+      errorArray.push(...errors.email)
     }
 
-    const {error} = await supabase.auth.signUp({
-      email: reqData.email,
-      password: reqData.password
-    })
-
-    if (error) {
-      return res.status(400).json({
-        error
-      })
+    if (errors.password) {
+      errorArray.push(...errors.password)
     }
 
-  return res.status(200).send('')
-
+    return res.status(422).json({errors: errorArray})
   }
-  
-  return res.status(404).send('')
+
+    let { user, error } = await supabase.auth.signUp({
+    email,
+    password,
+  })
+  if (error) return res.status(401).json({ error: error.message })
+  return res.status(200).json({ user: user })
 }
